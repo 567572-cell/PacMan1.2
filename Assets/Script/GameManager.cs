@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -6,6 +7,9 @@ public class GameManager : MonoBehaviour
 
     public int score;
     int pelletsLeft;
+    public TMP_Text pelletText;
+    int totalPellets;
+    int pelletsEaten;
 
     void Awake()
     {
@@ -15,19 +19,23 @@ public class GameManager : MonoBehaviour
     public void RegisterPellet()
     {
         pelletsLeft++;
+        totalPellets++;
+        UpdateUI();
     }
 
     public void PelletEaten(int points)
     {
         score += points;
         pelletsLeft--;
+        pelletsEaten++;
+        UpdateUI();
 
         if (pelletsLeft == 0)
             Debug.Log("Level complete!");
     }
 
-    void OnGUI()
+    void UpdateUI()
     {
-        GUI.Label(new Rect(20, 20, 300, 40), "Score: " + score);
+        pelletText.text = "Pellets: " + pelletsEaten + " / " + totalPellets;
     }
 }
