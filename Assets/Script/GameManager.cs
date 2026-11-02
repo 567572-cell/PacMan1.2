@@ -2,15 +2,32 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public static GameManager Instance;
+
+    public int score;
+    int pelletsLeft;
+
+    void Awake()
     {
-        
+        Instance = this;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void RegisterPellet()
     {
-        
+        pelletsLeft++;
+    }
+
+    public void PelletEaten(int points)
+    {
+        score += points;
+        pelletsLeft--;
+
+        if (pelletsLeft == 0)
+            Debug.Log("Level complete!");
+    }
+
+    void OnGUI()
+    {
+        GUI.Label(new Rect(20, 20, 300, 40), "Score: " + score);
     }
 }
