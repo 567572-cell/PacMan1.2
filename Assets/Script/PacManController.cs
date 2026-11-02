@@ -5,36 +5,60 @@ public class PacmanController : MonoBehaviour
 {
     public float speed = 4f;
     public LayerMask wallLayer;
-    private float checkDistance = 0.6f;
-    private float checkRadius = 0.35f;
+    public float checkDistance = 0.6f;
+    public float checkRadius = 0.35f;
 
     Rigidbody rb;
     Vector3 currentDirection = Vector3.zero;
     Vector3 queuedDirection = Vector3.zero;
+    Vector3 facing = Vector3.forward;
 
     void Awake() => rb = GetComponent<Rigidbody>();
+    void Start()
+    {
+        Vector3[] dirs = { Vector3.forward, Vector3.right, Vector3.back, Vector3.left };
+
+        foreach (Vector3 d in dirs)
+        {
+            if (IsClear(d))
+            {
+                facing = d;
+                transform.rotation = Quaternion.LookRotation(facing);
+                break;
+            }
+        }
+    }
 
     void Update()
     {
         var kb = Keyboard.current;
         if (kb == null) return;
 
-        Vector2 input = Vector2.zero;
-        if (kb.wKey.isPressed || kb.upArrowKey.isPressed) input.y = 1;
-        if (kb.sKey.isPressed || kb.downArrowKey.isPressed) input.y = -1;
-        if (kb.aKey.isPressed || kb.leftArrowKey.isPressed) input.x = -1;
-        if (kb.dKey.isPressed || kb.rightArrowKey.isPressed) input.x = 1;
+        // Forward: keep going the way he's facing
+        if (kb.wKey.wasPressedThisFrame || kb.upArrowKey.wasPressedThisFrame)
+            queuedDirection = facing;
 
-        if (input != Vector2.zero)
-            queuedDirection = CameraRelative(input);
-        //Debug.Log($"input {input} -> queued {queuedDirection}");
+        // Back: turn around
+        if (kb.sKey.wasPressedThisFrame || kb.downArrowKey.wasPressedThisFrame)
+            queuedDirection = -facing;
+
+        // Left: 90° to his left
+        if (kb.aKey.wasPressedThisFrame || kb.leftArrowKey.wasPressedThisFrame)
+            queuedDirection = new Vector3(-facing.z, 0, facing.x);
+
+        // Right: 90° to his right
+        if (kb.dKey.wasPressedThisFrame || kb.rightArrowKey.wasPressedThisFrame)
+            queuedDirection = new Vector3(facing.z, 0, -facing.x);
     }
 
     void FixedUpdate()
     {
-        // Take the queued turn if there's a gap that way
         if (queuedDirection != Vector3.zero && IsClear(queuedDirection))
+        {
             currentDirection = queuedDirection;
+            facing = currentDirection;
+            transform.rotation = Quaternion.LookRotation(facing);
+        }
 
         // Stop if we're about to hit a wall
         if (currentDirection != Vector3.zero && !IsClear(currentDirection))
@@ -56,20 +80,5 @@ public class PacmanController : MonoBehaviour
         }
 
     
-    Vector3 CameraRelative(Vector2 input)
-    {
-        Transform cam = Camera.main.transform;
-
-        // Camera's forward and right, flattened onto the floor
-        Vector3 forward = cam.forward; forward.y = 0; forward.Normalize();
-        Vector3 right = cam.right; right.y = 0; right.Normalize();
-
-        Vector3 dir = forward * input.y + right * input.x;
-
-        // Snap to the nearest grid axis so he never moves diagonally
-        if (Mathf.Abs(dir.x) > Mathf.Abs(dir.z))
-            return new Vector3(Mathf.Sign(dir.x), 0, 0);
-        else
-            return new Vector3(0, 0, Mathf.Sign(dir.z));
-    }
+    
 }
