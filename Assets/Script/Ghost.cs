@@ -9,6 +9,7 @@ public class Ghost : MonoBehaviour
     public Transform pacman;
     public Color colour = new Color(1f, 0.4f, 0.7f);
     public float chaseSpeed = 30f;
+    Vector3 startPos;
 
     [HideInInspector] public NavMeshAgent agent;
     StateMachine machine = new StateMachine();
@@ -33,10 +34,23 @@ public class Ghost : MonoBehaviour
             agent.Warp(hit.position);
 
         machine.ChangeState(new ChaseState(this));
+        startPos = transform.position;
     }
 
     void Update()
     {
         machine.Tick();
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+            GameManager.Instance.PacmanCaught();
+    }
+
+    public void ResetToStart()
+    {
+        agent.Warp(startPos);
+        machine.ChangeState(new ChaseState(this));
     }
 }

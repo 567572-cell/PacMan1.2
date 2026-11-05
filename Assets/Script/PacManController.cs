@@ -12,8 +12,13 @@ public class PacmanController : MonoBehaviour
     Vector3 currentDirection = Vector3.zero;
     Vector3 queuedDirection = Vector3.zero;
     Vector3 facing = Vector3.forward;
+    Vector3 startPos;
 
-    void Awake() => rb = GetComponent<Rigidbody>();
+    void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+        startPos = transform.position;
+    }
     void Start()
     {
         Vector3[] dirs = { Vector3.forward, Vector3.right, Vector3.back, Vector3.left };
@@ -79,6 +84,13 @@ public class PacmanController : MonoBehaviour
             return !hit;
         }
 
-    
-    
+    public void ResetToStart()
+    {
+        rb.position = startPos;
+        transform.position = startPos;
+        rb.linearVelocity = Vector3.zero;
+        currentDirection = Vector3.zero;
+        queuedDirection = Vector3.zero;
+    }
+
 }

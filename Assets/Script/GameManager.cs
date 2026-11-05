@@ -10,6 +10,8 @@ public class GameManager : MonoBehaviour
     public TMP_Text pelletText;
     int totalPellets;
     int pelletsEaten;
+    public int lives = 3;
+
 
     void Awake()
     {
@@ -37,5 +39,31 @@ public class GameManager : MonoBehaviour
     void UpdateUI()
     {
         pelletText.text = "Pellets: " + pelletsEaten + " / " + totalPellets;
+        pelletText.text = "Pellets: " + pelletsEaten + " / " + totalPellets + "   Lives: " + lives;
+    }
+
+    public void PacmanCaught()
+    {
+        lives--;
+        UpdateUI();
+
+        if (lives <= 0)
+            GameOver();
+        else
+            ResetPositions();
+    }
+
+    void ResetPositions()
+    {
+        FindFirstObjectByType<PacmanController>().ResetToStart();
+
+        foreach (Ghost g in FindObjectsByType<Ghost>())
+            g.ResetToStart();
+    }
+
+    void GameOver()
+    {
+        pelletText.text = "GAME OVER";
+        Time.timeScale = 0f;
     }
 }
